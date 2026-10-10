@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 
 import 'screens/splash_screen.dart';
 
+import 'screens/balance_screen.dart';
+
+import 'screens/savings_screen.dart';
+
+import 'screens/rewards_screen.dart';
+
 void main() {
   runApp(const GoalDenApp());
 }

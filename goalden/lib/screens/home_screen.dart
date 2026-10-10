@@ -1,5 +1,25 @@
 import 'package:flutter/material.dart';
 
+import 'balance_screen.dart';
+import 'savings_screen.dart';
+import 'rewards_screen.dart';
+
+Route slideRoute(Widget page) {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => page,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(1.0, 0.0),
+          end: Offset.zero,
+        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut)),
+        child: child,
+      );
+    },
+    transitionDuration: const Duration(milliseconds: 500),
+  );
+}
+
 class DashboardCard extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -24,7 +44,7 @@ class DashboardCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.15),
+            color: Colors.black.withOpacity(0.15),
             blurRadius: 15,
             spreadRadius: 2,
             offset: const Offset(0, 8),
@@ -37,7 +57,7 @@ class DashboardCard extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 30,
-              backgroundColor: color.withOpacity(.15),
+              backgroundColor: color.withOpacity(0.15),
               child: Icon(icon, color: color, size: 32),
             ),
 
@@ -105,7 +125,6 @@ class HomeScreen extends StatelessWidget {
 
       body: Stack(
         children: [
-          // Gradient Background
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -116,7 +135,6 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
 
-          // Decorative Wave
           Positioned(
             top: -100,
             left: -50,
@@ -124,7 +142,7 @@ class HomeScreen extends StatelessWidget {
             child: Container(
               height: 250,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(.12),
+                color: Colors.white.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(200),
               ),
             ),
@@ -156,25 +174,52 @@ class HomeScreen extends StatelessWidget {
 
                   const SizedBox(height: 30),
 
-                  DashboardCard(
-                    icon: Icons.account_balance_wallet,
-                    title: "Current Balance",
-                    value: "\$1,250",
-                    color: Colors.green,
+                  InkWell(
+                    borderRadius: BorderRadius.circular(25),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        slideRoute(const BalanceScreen()),
+                      );
+                    },
+                    child: const DashboardCard(
+                      icon: Icons.account_balance_wallet,
+                      title: "Current Balance",
+                      value: "\$1,250",
+                      color: Colors.green,
+                    ),
                   ),
 
-                  DashboardCard(
-                    icon: Icons.savings,
-                    title: "Savings Goal",
-                    value: "\$500 / \$2000",
-                    color: Colors.pink,
+                  InkWell(
+                    borderRadius: BorderRadius.circular(25),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        slideRoute(const SavingsScreen()),
+                      );
+                    },
+                    child: const DashboardCard(
+                      icon: Icons.savings,
+                      title: "Savings Goal",
+                      value: "\$500 / \$2000",
+                      color: Colors.pink,
+                    ),
                   ),
 
-                  DashboardCard(
-                    icon: Icons.emoji_events,
-                    title: "Reward Points",
-                    value: "350",
-                    color: Colors.orange,
+                  InkWell(
+                    borderRadius: BorderRadius.circular(25),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        slideRoute(const RewardsScreen()),
+                      );
+                    },
+                    child: const DashboardCard(
+                      icon: Icons.emoji_events,
+                      title: "Reward Points",
+                      value: "350",
+                      color: Colors.orange,
+                    ),
                   ),
                 ],
               ),
