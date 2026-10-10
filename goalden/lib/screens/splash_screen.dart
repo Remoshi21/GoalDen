@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_soloud/flutter_soloud.dart';
 
 import 'login_screen.dart';
 
@@ -9,32 +10,53 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController controller;
+class _SplashScreenState extends State<SplashScreen> {
+  int stage = 0;
 
-  bool coinEntered = false;
+  AudioSource? introSound;
+
+  Future<void> initializeAudio() async {
+    try {
+      await SoLoud.instance.init();
+
+      introSound = await SoLoud.instance.loadAsset(
+        'assets/audio/ElevenLabs_PiggyBankIntro.mp3',
+      );
+    } catch (e) {
+      debugPrint('Audio initialization failed: $e');
+    }
+  }
 
   @override
   void initState() {
     super.initState();
 
-    controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 3),
-    );
+    initializeAudio();
 
-    controller.forward();
+    // Team intro disappears
+    Future.delayed(const Duration(milliseconds: 2200), () async {
+      if (!mounted) return;
 
-    Future.delayed(const Duration(milliseconds: 1500), () {
-      if (mounted) {
-        setState(() {
-          coinEntered = true;
-        });
+      setState(() {
+        stage = 1;
+      });
+
+      if (introSound != null) {
+        SoLoud.instance.play(introSound!);
       }
     });
 
-    Future.delayed(const Duration(seconds: 3), () {
+    // Change speech bubble text
+    Future.delayed(const Duration(milliseconds: 5500), () {
+      if (!mounted) return;
+
+      setState(() {
+        stage = 2;
+      });
+    });
+
+    // Fade to login screen
+    Future.delayed(const Duration(milliseconds: 8500), () {
       if (!mounted) return;
 
       Navigator.pushReplacement(
@@ -42,18 +64,12 @@ class _SplashScreenState extends State<SplashScreen>
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) =>
               const LoginScreen(),
+
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return SlideTransition(
-              position:
-                  Tween<Offset>(
-                    begin: const Offset(1, 0),
-                    end: Offset.zero,
-                  ).animate(
-                    CurvedAnimation(parent: animation, curve: Curves.easeInOut),
-                  ),
-              child: child,
-            );
+            return FadeTransition(opacity: animation, child: child);
           },
+
+          transitionDuration: const Duration(milliseconds: 1200),
         ),
       );
     });
@@ -61,83 +77,122 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
-    controller.dispose();
+    SoLoud.instance.deinit();
     super.dispose();
   }
 
-  Widget sparkle(double left, double top, double size, Color color) {
-    return Positioned(
-      left: left,
-      top: top,
-      child: Icon(Icons.auto_awesome, color: color, size: size),
+  Widget buildSpeechBubble(String text) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 15,
+                offset: Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ),
+
+        Positioned(
+          bottom: -10,
+          right: 35,
+          child: Transform.rotate(
+            angle: 0.8,
+            child: Container(width: 18, height: 18, color: Colors.white),
+          ),
+        ),
+      ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF7FAF8),
 
-      body: Center(
-        child: AnimatedBuilder(
-          animation: controller,
-          builder: (context, child) {
-            return Stack(
-              alignment: Alignment.center,
-              children: [
-                // Falling Coin
-                if (!coinEntered)
-                  Positioned(
-                    top: 120 + (150 * controller.value),
-                    child: Transform.rotate(
-                      angle: controller.value * 12,
-                      child: const Icon(
-                        Icons.monetization_on,
-                        size: 60,
-                        color: Colors.amber,
-                      ),
+      body: Stack(
+        children: [
+          // MARIO KART 9 INTRO
+          AnimatedOpacity(
+            opacity: stage == 0 ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 1500),
+            child: Center(
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.80, end: 1.00),
+                duration: const Duration(milliseconds: 2000),
+                curve: Curves.easeOutBack,
+                builder: (context, scale, child) {
+                  return Transform.scale(scale: scale, child: child);
+                },
+                child: const Text(
+                  "Mario Kart 9 presents",
+                  style: TextStyle(
+                    fontSize: 52,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 3,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // GOALDEN INTRO
+          AnimatedOpacity(
+            opacity: stage > 0 ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 1500),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  buildSpeechBubble(
+                    stage < 2
+                        ? "Welcome to GoalDen!"
+                        : "Let's turn goals into gold!",
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0.75, end: 1.00),
+                    duration: const Duration(milliseconds: 1500),
+                    curve: Curves.easeOutBack,
+                    builder: (context, scale, child) {
+                      return Transform.scale(scale: scale, child: child);
+                    },
+                    child: Image.asset(
+                      'assets/images/piggy_bank.png',
+                      width: 260,
                     ),
                   ),
 
-                // Piggy Bank
-                AnimatedScale(
-                  duration: const Duration(milliseconds: 500),
-                  scale: coinEntered ? 1.25 : 1.0,
-                  child: Icon(
-                    Icons.savings,
-                    size: 140,
-                    color: coinEntered ? Colors.amber : Colors.pink,
-                  ),
-                ),
+                  const SizedBox(height: 40),
 
-                // Sparkles
-                if (coinEntered) ...[
-                  sparkle(-70, -60, 30, Colors.amber),
-                  sparkle(70, -50, 25, Colors.yellow),
-                  sparkle(-60, 30, 24, Colors.orange),
-                  sparkle(60, 40, 28, Colors.amber),
-                  sparkle(0, -90, 35, Colors.yellow),
-                ],
-
-                const Positioned(
-                  bottom: 100,
-                  child: Text(
+                  const Text(
                     "GoalDen",
-                    style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 42,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
                   ),
-                ),
-
-                const Positioned(
-                  bottom: 70,
-                  child: Text(
-                    "Turn Financial Goals Into Gold",
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

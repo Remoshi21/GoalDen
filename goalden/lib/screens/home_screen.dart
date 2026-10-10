@@ -94,10 +94,10 @@ class HomeScreen extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.green,
+        backgroundColor: Color.fromRGBO(156, 236, 237, 1),
         content: Text(
           "🎉 +50 Points Earned!",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
         ),
       ),
     );
@@ -112,29 +112,38 @@ class HomeScreen extends StatelessWidget {
         title: const Text("GoalDen Dashboard"),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: Colors.white,
+        foregroundColor: Colors.black87,
       ),
 
       floatingActionButton: FloatingActionButton.extended(
-        elevation: 10,
-        backgroundColor: Colors.orange,
+        elevation: 12,
+        backgroundColor: const Color(0xFFFFC107),
+        foregroundColor: Colors.black87,
         icon: const Icon(Icons.emoji_events),
-        label: const Text("Claim Reward"),
+        label: const Text(
+          "Claim Reward",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         onPressed: () => showReward(context),
       ),
 
       body: Stack(
         children: [
+          // Cyan Gradient Background
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFF2E7D32), Color(0xFF66BB6A)],
+                colors: [
+                  Color.fromRGBO(156, 236, 237, 1),
+                  Color.fromRGBO(220, 255, 255, 1),
+                ],
               ),
             ),
           ),
 
+          // Decorative Wave
           Positioned(
             top: -100,
             left: -50,
@@ -142,7 +151,7 @@ class HomeScreen extends StatelessWidget {
             child: Container(
               height: 250,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.12),
+                color: Colors.white.withOpacity(0.35),
                 borderRadius: BorderRadius.circular(200),
               ),
             ),
@@ -161,7 +170,7 @@ class HomeScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Colors.black87,
                     ),
                   ),
 
@@ -169,7 +178,7 @@ class HomeScreen extends StatelessWidget {
 
                   const Text(
                     "Let's grow your savings today.",
-                    style: TextStyle(fontSize: 16, color: Colors.white70),
+                    style: TextStyle(fontSize: 16, color: Colors.black54),
                   ),
 
                   const SizedBox(height: 30),
