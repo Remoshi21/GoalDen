@@ -1,31 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
-import '../data/goals_repository.dart';
-import '../models/savings_goal.dart';
-
-class GoalsScreen extends StatefulWidget {
+class GoalsScreen extends StatelessWidget {
   const GoalsScreen({super.key});
-
-  @override
-  State<GoalsScreen> createState() => _GoalsScreenState();
-}
-
-class _GoalsScreenState extends State<GoalsScreen> {
-  Stream<List<SavingsGoal>>? _goals;
-
-  @override
-  void initState() {
-    super.initState();
-
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      _goals = GoalsRepository().watchGoals(user.uid);
-    }
-  }
-
-  String _money(int cents) =>
-      '\$${(cents / 100).toStringAsFixed(2)}';
 
   Widget goalCard({
     required String title,
@@ -151,83 +127,161 @@ class _GoalsScreenState extends State<GoalsScreen> {
             const SizedBox(height: 20),
 
             Expanded(
-              child: _goals == null
-                  ? const Center(
-                      child: Text('Please sign in to view your goals.'),
-                    )
-                  : StreamBuilder<List<SavingsGoal>>(
-                      stream: _goals,
-                      builder: (context, snapshot) {
-                        if (snapshot.hasError) {
-                          return const Center(
-                            child: Text('Could not load your goals.'),
-                          );
-                        }
+              child: ListView(
+                children: [
+                  goalCard(
+                    title: "Move Into First Apartment",
+                    amount: "\$500 / \$2,000",
+                    progress: 0.25,
+                    icon: Icons.home,
+                    color: Colors.deepPurple,
+                  ),
 
-                        if (!snapshot.hasData) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
+                  goalCard(
+                    title: "Emergency Fund",
+                    amount: "\$1,500 / \$5,000",
+                    progress: 0.30,
+                    icon: Icons.health_and_safety,
+                    color: Colors.red,
+                  ),
 
-                        final goals = snapshot.data!;
+                  goalCard(
+                    title: "Travel Budget",
+                    amount: "\$800 / \$2,000",
+                    progress: 0.40,
+                    icon: Icons.flight_takeoff,
+                    color: Colors.blue,
+                  ),
 
-                        if (goals.isEmpty) {
-                          return const Center(
-                            child: Text('No savings goals yet.'),
-                          );
-                        }
+                  goalCard(
+                    title: "Buy New Car",
+                    amount: "\$4,000 / \$15,000",
+                    progress: 0.27,
+                    icon: Icons.directions_car,
+                    color: Colors.green,
+                  ),
 
-                        const icons = [
-                          Icons.home,
-                          Icons.health_and_safety,
-                          Icons.flight_takeoff,
-                          Icons.directions_car,
-                        ];
+                  const SizedBox(height: 25),
 
+                  const Text(
+                    "Achievements",
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
 
-                        const colors = [
-                          Colors.deepPurple,
-                          Colors.red,
-                          Colors.blue,
-                          Colors.green,
-                        ];
+                  const SizedBox(height: 10),
 
-                        return ListView(
-                          children: [
-                            for (var index = 0; index < goals.length; index++)
-                              KeyedSubtree(
-                                key: ValueKey(goals[index].id),
-                                child: goalCard(
-                                  title: goals[index].title,
-                                  amount:
-                                      '${_money(goals[index].savedCents)} / '
-                                      '${_money(goals[index].targetCents)}',
-                                  progress: goals[index].progress,
-                                  icon: icons[index % icons.length],
-                                  color: colors[index % colors.length],
-                                ),
-                              ),
-                            const SizedBox(height: 25),
-                            const Text(
-                              'Recent Deposits',
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            const Card(
-                              child: ListTile(
-                                leading: Icon(Icons.savings, color: Colors.green),
-                                title: Text('Deposit history is coming soon.'),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: [
+                      Chip(
+                        avatar: Icon(Icons.login),
+                        label: Text("First Login"),
+                      ),
+                      Chip(
+                        avatar: Icon(Icons.calendar_today),
+                        label: Text("7 Day Streak"),
+                      ),
+                      Chip(
+                        avatar: Icon(Icons.savings),
+                        label: Text("Saved \$500"),
+                      ),
+                      Chip(
+                        avatar: Icon(Icons.flag),
+                        label: Text("First Goal Created"),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 25),
+
+                  const Text(
+                    "Level Titles",
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+
+                  const Card(
+                    child: ListTile(
+                      leading: Icon(Icons.looks_one),
+                      title: Text("Level 1"),
+                      subtitle: Text("Recession Rookie"),
                     ),
->>>>>>> 8401f617a25c8c91171a39c360f06d5591385d06
+                  ),
+
+                  const Card(
+                    child: ListTile(
+                      leading: Icon(Icons.looks_two),
+                      title: Text("Level 2"),
+                      subtitle: Text("Non-Sufficient Novice"),
+                    ),
+                  ),
+
+                  const Card(
+                    child: ListTile(
+                      leading: Icon(Icons.looks_3),
+                      title: Text("Level 3"),
+                      subtitle: Text("Investor Intermediate"),
+                    ),
+                  ),
+
+                  const Card(
+                    child: ListTile(
+                      leading: Icon(Icons.looks_4),
+                      title: Text("Level 4"),
+                      subtitle: Text("Profit Proficient"),
+                    ),
+                  ),
+
+                  const Card(
+                    child: ListTile(
+                      leading: Icon(Icons.looks_5),
+                      title: Text("Level 5"),
+                      subtitle: Text("Equity Expert"),
+                    ),
+                  ),
+
+                  const SizedBox(height: 25),
+
+                  const Text(
+                    "Recent Deposits",
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  const Card(
+                    child: ListTile(
+                      leading: Icon(Icons.savings, color: Colors.green),
+                      title: Text("+\$100"),
+                      subtitle: Text("Emergency Fund • Jan 2"),
+                    ),
+                  ),
+
+                  const Card(
+                    child: ListTile(
+                      leading: Icon(Icons.savings, color: Colors.green),
+                      title: Text("+\$50"),
+                      subtitle: Text("Travel Budget • Jan 10"),
+                    ),
+                  ),
+
+                  const Card(
+                    child: ListTile(
+                      leading: Icon(Icons.savings, color: Colors.green),
+                      title: Text("+\$200"),
+                      subtitle: Text("Buy New Car • Jan 15"),
+                    ),
+                  ),
+
+                  const Card(
+                    child: ListTile(
+                      leading: Icon(Icons.savings, color: Colors.green),
+                      title: Text("+\$300"),
+                      subtitle: Text("Move Into First Apartment • Jan 22"),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
