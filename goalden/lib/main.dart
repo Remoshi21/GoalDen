@@ -2,16 +2,12 @@ import 'package:flutter/material.dart';
 
 import 'screens/splash_screen.dart';
 
-import 'screens/balance_screen.dart';
 
-import 'screens/savings_screen.dart';
 
-import 'screens/rewards_screen.dart';
 
 //Firebase Imports
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -8,16 +8,31 @@ class AuthService {
   Stream<User?> get authState => _auth.authStateChanges();
   String get uid => _auth.currentUser!.uid;
 
-  Future<String?> signUp(String email, String password) async {
+  Future<String?> signUp({
+    required String name,
+    required String phone,
+    required String email,
+    required String password,
+  }) async {
     try {
       final cred = await _auth.createUserWithEmailAndPassword(
-          email: email, password: password);
+        email: email,
+        password: password,
+      );
+
+      try {
+        await cred.user!.updateDisplayName(name);
+      } catch (e) {
+        print('Display name update failed: $e');
+      }
 
       try {
         await _db
             .collection('users')
             .doc(cred.user!.uid)
             .set({
+              'name': name,
+              'phone': phone,
               'email': email,
               'createdAt': FieldValue.serverTimestamp(),
             })

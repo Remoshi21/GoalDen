@@ -10,6 +10,8 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+  final nameController = TextEditingController();
+  final phoneController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmController = TextEditingController();
@@ -18,6 +20,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   void dispose() {
+    nameController.dispose();
+    phoneController.dispose();
     emailController.dispose();
     passwordController.dispose();
     confirmController.dispose();
@@ -44,21 +48,43 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> _signUp() async {
+    final name = nameController.text.trim();
+    final phone = phoneController.text.trim();
     final email = emailController.text.trim();
     final password = passwordController.text;
     final confirm = confirmController.text;
 
-    if (email.isEmpty || password.isEmpty || confirm.isEmpty) {
+    if (name.isEmpty ||
+        phone.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        confirm.isEmpty) {
       _showMessage('Please fill in all fields.');
       return;
     }
+
+    // Phone: allow digits, spaces, dashes, parentheses, and a leading +
+    final phoneDigits = phone.replaceAll(RegExp(r'\D'), '');
+    final phoneChars = RegExp(r'^\+?[0-9\s\-()]+$');
+    if (!phoneChars.hasMatch(phone) ||
+        phoneDigits.length < 7 ||
+        phoneDigits.length > 15) {
+      _showMessage('Please enter a valid phone number.');
+      return;
+    }
+
     if (password != confirm) {
       _showMessage('Passwords do not match.');
       return;
     }
 
     setState(() => isLoading = true);
-    final error = await authService.signUp(email, password);
+    final error = await authService.signUp(
+      name: name,
+      phone: phone,
+      email: email,
+      password: password,
+    );
     if (!mounted) return;
     setState(() => isLoading = false);
 
@@ -91,10 +117,32 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 const SizedBox(height: 30),
                 TextField(
+                  controller: nameController,
+                  keyboardType: TextInputType.name,
+                  textCapitalization: TextCapitalization.words,
+                  decoration: const InputDecoration(
+                    labelText: "Full name",
+                    prefixIcon: Icon(Icons.person),
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                TextField(
+                  controller: phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(
+                    labelText: "Phone number",
+                    prefixIcon: Icon(Icons.phone),
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                TextField(
                   controller: emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
                     labelText: "Email",
+                    prefixIcon: Icon(Icons.email),
                     border: OutlineInputBorder(),
                   ),
                 ),
@@ -104,6 +152,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   obscureText: true,
                   decoration: const InputDecoration(
                     labelText: "Password",
+                    prefixIcon: Icon(Icons.lock),
                     border: OutlineInputBorder(),
                   ),
                 ),
@@ -113,6 +162,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   obscureText: true,
                   decoration: const InputDecoration(
                     labelText: "Confirm password",
+                    prefixIcon: Icon(Icons.lock_outline),
                     border: OutlineInputBorder(),
                   ),
                 ),
