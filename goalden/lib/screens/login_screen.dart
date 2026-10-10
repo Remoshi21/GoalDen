@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../widgets/coin_piggy_animation.dart';
 import '../widgets/main_navigation.dart';
-
-import 'package:firebase_auth/firebase_auth.dart';
+import 'sign_up_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -75,8 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final message = switch (error.code) {
         'network-request-failed' =>
           'Check your internet connection and try again.',
-        'too-many-requests' =>
-          'Too many attempts. Please try again later.',
+        'too-many-requests' => 'Too many attempts. Please try again later.',
         _ => 'Unable to sign in. Check your email and password.',
       };
 
@@ -100,7 +99,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(24),
@@ -109,33 +107,26 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               children: [
                 const CoinPiggyAnimation(),
-
                 const SizedBox(height: 20),
-
                 const Text(
                   "GoalDen",
                   style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
                 ),
-
                 const SizedBox(height: 10),
-
                 const Text(
                   "Turn Financial Goals Into Gold",
                   textAlign: TextAlign.center,
                 ),
-
                 const SizedBox(height: 40),
-
                 TextField(
                   controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
                     labelText: "Email",
                     border: OutlineInputBorder(),
                   ),
                 ),
-
                 const SizedBox(height: 15),
-
                 TextField(
                   controller: passwordController,
                   obscureText: true,
@@ -144,15 +135,25 @@ class _LoginScreenState extends State<LoginScreen> {
                     border: OutlineInputBorder(),
                   ),
                 ),
-
                 const SizedBox(height: 25),
-
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _isLoggingIn ? null :
-                    _login, child: Text(_isLoggingIn ? 'Signing in…' : 'Login'),
+                    onPressed: _isLoggingIn ? null : _login,
+                    child: Text(_isLoggingIn ? 'Signing in…' : 'Login'),
                   ),
+                ),
+                const SizedBox(height: 10),
+                TextButton(
+                  onPressed: _isLoggingIn
+                      ? null
+                      : () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const SignUpScreen(),
+                            ),
+                          ),
+                  child: const Text("Create an account"),
                 ),
               ],
             ),
