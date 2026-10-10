@@ -209,7 +209,7 @@ class HomeScreen extends StatelessWidget {
                     },
                     child: const DashboardCard(
                       icon: Icons.savings,
-                      title: "Savings Goal",
+                      title: "Budgeting Chart",
                       value: "\$500 / \$2000",
                       color: Colors.pink,
                     ),

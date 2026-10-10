@@ -24,7 +24,9 @@ class GoalsScreen extends StatelessWidget {
                   backgroundColor: color.withOpacity(0.15),
                   child: Icon(icon, color: color),
                 ),
+
                 const SizedBox(width: 12),
+
                 Expanded(
                   child: Text(
                     title,
@@ -93,6 +95,37 @@ class GoalsScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
+            Card(
+              color: Colors.amber.shade100,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Text(
+                      "Level 3 • Investor Intermediate",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    SizedBox(height: 10),
+
+                    LinearProgressIndicator(value: .65, minHeight: 10),
+
+                    SizedBox(height: 10),
+
+                    Text("650 / 1000 XP"),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
             Expanded(
               child: ListView(
                 children: [
@@ -131,13 +164,92 @@ class GoalsScreen extends StatelessWidget {
                   const SizedBox(height: 25),
 
                   const Text(
+                    "Achievements",
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: [
+                      Chip(
+                        avatar: Icon(Icons.login),
+                        label: Text("First Login"),
+                      ),
+                      Chip(
+                        avatar: Icon(Icons.calendar_today),
+                        label: Text("7 Day Streak"),
+                      ),
+                      Chip(
+                        avatar: Icon(Icons.savings),
+                        label: Text("Saved \$500"),
+                      ),
+                      Chip(
+                        avatar: Icon(Icons.flag),
+                        label: Text("First Goal Created"),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 25),
+
+                  const Text(
+                    "Level Titles",
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+
+                  const Card(
+                    child: ListTile(
+                      leading: Icon(Icons.looks_one),
+                      title: Text("Level 1"),
+                      subtitle: Text("Recession Rookie"),
+                    ),
+                  ),
+
+                  const Card(
+                    child: ListTile(
+                      leading: Icon(Icons.looks_two),
+                      title: Text("Level 2"),
+                      subtitle: Text("Non-Sufficient Novice"),
+                    ),
+                  ),
+
+                  const Card(
+                    child: ListTile(
+                      leading: Icon(Icons.looks_3),
+                      title: Text("Level 3"),
+                      subtitle: Text("Investor Intermediate"),
+                    ),
+                  ),
+
+                  const Card(
+                    child: ListTile(
+                      leading: Icon(Icons.looks_4),
+                      title: Text("Level 4"),
+                      subtitle: Text("Profit Proficient"),
+                    ),
+                  ),
+
+                  const Card(
+                    child: ListTile(
+                      leading: Icon(Icons.looks_5),
+                      title: Text("Level 5"),
+                      subtitle: Text("Equity Expert"),
+                    ),
+                  ),
+
+                  const SizedBox(height: 25),
+
+                  const Text(
                     "Recent Deposits",
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
 
                   const SizedBox(height: 10),
 
-                  Card(
+                  const Card(
                     child: ListTile(
                       leading: Icon(Icons.savings, color: Colors.green),
                       title: Text("+\$100"),
@@ -145,7 +257,7 @@ class GoalsScreen extends StatelessWidget {
                     ),
                   ),
 
-                  Card(
+                  const Card(
                     child: ListTile(
                       leading: Icon(Icons.savings, color: Colors.green),
                       title: Text("+\$50"),
@@ -153,7 +265,7 @@ class GoalsScreen extends StatelessWidget {
                     ),
                   ),
 
-                  Card(
+                  const Card(
                     child: ListTile(
                       leading: Icon(Icons.savings, color: Colors.green),
                       title: Text("+\$200"),
@@ -161,7 +273,7 @@ class GoalsScreen extends StatelessWidget {
                     ),
                   ),
 
-                  Card(
+                  const Card(
                     child: ListTile(
                       leading: Icon(Icons.savings, color: Colors.green),
                       title: Text("+\$300"),
