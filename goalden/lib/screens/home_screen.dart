@@ -313,7 +313,14 @@ class HomeScreen extends StatelessWidget {
                         );
                       },
                       icon: const Icon(Icons.lightbulb_outline),
-                      label: const Text('Money Fact'),
+                      label: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('GoldEye'),
+                          SizedBox(width: 8),
+                          Icon(Icons.auto_awesome, size: 18),
+                        ],
+                      ),
                     ),
                   ),
 
