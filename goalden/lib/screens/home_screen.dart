@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+
 import '../widgets/user_doc_builder.dart';
+import '../widgets/assistant_sheet.dart';
 import 'balance_screen.dart';
 import 'savings_screen.dart';
 import 'rewards_screen.dart';
@@ -272,6 +274,41 @@ class HomeScreen extends StatelessWidget {
                       color: Colors.orange,
                     ),
                   ),
+
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF2E7D32),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                      icon: const Icon(Icons.lightbulb_outline, size: 20),
+                      label: const Text('Money Fact'),
+                      onPressed: () {
+                        showModalBottomSheet<void>(
+                          context: context,
+                          isScrollControlled: true,
+                          useSafeArea: true,
+                          showDragHandle: true,
+                          backgroundColor: Colors.white,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(24),
+                            ),
+                          ),
+                          builder: (_) => const FinancialFactSheet(),
+                        );
+                      },
+                    ),
+                  ),
+
+// Lets the button scroll clear of the existing Claim Reward button.
+const SizedBox(height: 90),
+
                 ],
               ),
             ),
