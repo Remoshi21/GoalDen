@@ -69,8 +69,11 @@ app.post("/chat", async (req, res) => {
     });
   }
 
-  const model =
-    process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
+  const model = (
+    process.env.GEMINI_MODEL || "gemini-3.5-flash-lite"
+  ).trim();
+
+  console.log("Using Gemini model:", model);
 
   try {
     const response = await fetch(
@@ -83,24 +86,59 @@ app.post("/chat", async (req, res) => {
         },
         signal: AbortSignal.timeout(25_000),
         body: JSON.stringify({
-          systemInstruction: {
-            parts: [{
-              text: [
-                "You are GoalDen's friendly savings assistant.",
-                "Help with saving, budgeting, and setting achievable goals.",
-                "Use simple language and keep answers under 200 words.",
-                "Ask for missing numbers instead of inventing them.",
-                "You cannot see account balances, goals, or rewards.",
-                "You cannot change accounts or award points.",
-                "Do not request passwords or bank account details.",
-                "Provide general education related to financial literacy; avoid specific investment recommendations.",
-              ].join(" "),
-            }],
-          },
-          contents: [{
-            role: "user",
-            parts: [{ text: message.trim() }],
-          }],
+systemInstruction: {
+  parts: [{
+    text: [
+      "Generate one accurate financial-literacy fact for beginners.",
+      "Use plain language and no more than 30 words.",
+      "Include one practical budgeting or saving tip.",
+      "Avoid current statistics, tax rules, specific financial products,",
+      "investment recommendations, and unsupported claims.",
+      "Return plain text without a heading.",
+    ].join(" "),
+  }],
+},
+      contents: [{
+        role: "user",
+        parts: [{
+          text: `Give me a fact related to the term ${
+            [
+              "Assets",
+              "Bonds",
+              "Budgeting",
+              "Compound interest",
+              "Capital",
+              "Credit",
+              "Debit",
+              "Equity",
+              "Funds",
+              "Grants",
+              "High Yield Savings",
+              "Index Fund",
+              "Joint Stock",
+              "401K ",
+              "Loans",
+              "Market",
+              "Net-Asset Value (NAV)",
+              "Online Banking",
+              "Penny Stock",
+              "Quant Fund",
+              "Roth IRA",
+              "ROI",
+              "Stock",
+              "Trade",
+              "Unearned Income",
+              "Value",
+              "Wall Street",
+              "Wealth",
+              "XIRR",
+              "Yield",
+              "Zero Coupon Bond"
+
+            ][Math.floor(Math.random() * 30)]
+          }. Variation seed: ${Math.random()}`,
+        }],
+      }],
           generationConfig: {
             maxOutputTokens: 350,
             temperature: 0.5,
@@ -131,11 +169,17 @@ app.post("/chat", async (req, res) => {
     res.json({
       reply: reply || "I could not answer that. Try rephrasing your question.",
     });
-  } catch {
-    res.status(502).json({
-      error: "The AI request timed out or could not connect. Try again.",
-    });
-  }
+  } catch (error) {
+  console.error("Gemini connection failed:", {
+    name: error.name,
+    message: error.message,
+    cause: error.cause?.code,
+  });
+
+  res.status(502).json({
+    error: "The AI request timed out or could not connect. Try again.",
+  });
+}
 });
 
 const port = Number(process.env.PORT || 3000);
