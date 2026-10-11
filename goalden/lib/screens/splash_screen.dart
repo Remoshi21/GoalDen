@@ -138,6 +138,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 },
                 child: const Text(
                   "Mario Kart 9 presents",
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 52,
                     fontWeight: FontWeight.bold,

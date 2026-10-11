@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../widgets/assistant_sheet.dart';
 import '../services/reward_service.dart';
 import '../widgets/user_doc_builder.dart';
 import 'balance_screen.dart';
@@ -301,6 +301,24 @@ class HomeScreen extends StatelessWidget {
                       color: Colors.orange,
                     ),
                   ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: () {
+                        showModalBottomSheet<void>(
+                          context: context,
+                          isScrollControlled: true,
+                          showDragHandle: true,
+                          builder: (_) => const FinancialFactSheet(),
+                        );
+                      },
+                      icon: const Icon(Icons.lightbulb_outline),
+                      label: const Text('Money Fact'),
+                    ),
+                  ),
+
+                  // Keep the floating Claim Reward button from covering it.
+                  const SizedBox(height: 88),
                 ],
               ),
             ),

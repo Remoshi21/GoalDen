@@ -136,7 +136,7 @@ class _FinancialFactSheetState extends State<FinancialFactSheet> {
               ),
             const SizedBox(height: 16),
             const Text(
-              'AI-generated • General education',
+              'Powered by AI',
               style: TextStyle(fontSize: 12, color: Colors.black54),
             ),
             const SizedBox(height: 12),
