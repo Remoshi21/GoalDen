@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-
+import '../services/reward_service.dart';
 import '../widgets/user_doc_builder.dart';
-import '../widgets/assistant_sheet.dart';
 import 'balance_screen.dart';
 import 'savings_screen.dart';
 import 'rewards_screen.dart';
@@ -127,14 +126,34 @@ class LiveStat extends StatelessWidget {
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  void showReward(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+  Future<void> claimReward(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+
+    bool gotPoints;
+    try {
+      gotPoints = await RewardService.claimDailyReward();
+    } catch (e) {
+      messenger.showSnackBar(
+        const SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text("Could not claim your reward. Please try again."),
+        ),
+      );
+      return;
+    }
+
+    messenger.showSnackBar(
+      SnackBar(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: Color.fromRGBO(156, 236, 237, 1),
+        backgroundColor: const Color.fromRGBO(156, 236, 237, 1),
         content: Text(
-          "🎉 +50 Points Earned!",
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+          gotPoints
+              ? "🎉 +${RewardService.dailyPoints} Points Earned!"
+              : "You already claimed today. Come back tomorrow!",
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
         ),
       ),
     );
@@ -152,16 +171,24 @@ class HomeScreen extends StatelessWidget {
         foregroundColor: Colors.black87,
       ),
 
-      floatingActionButton: FloatingActionButton.extended(
-        elevation: 12,
-        backgroundColor: const Color(0xFFFFC107),
-        foregroundColor: Colors.black87,
-        icon: const Icon(Icons.emoji_events),
-        label: const Text(
-          "Claim Reward",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        onPressed: () => showReward(context),
+      // Turns grey once today's reward has been claimed
+      floatingActionButton: UserDocBuilder(
+        builder: (context, data) {
+          final claimed = data['lastClaimDay'] == RewardService.todayKey();
+
+          return FloatingActionButton.extended(
+            elevation: claimed ? 0 : 12,
+            backgroundColor:
+                claimed ? Colors.grey.shade400 : const Color(0xFFFFC107),
+            foregroundColor: claimed ? Colors.black45 : Colors.black87,
+            icon: Icon(claimed ? Icons.check_circle : Icons.emoji_events),
+            label: Text(
+              claimed ? "Claimed Today" : "Claim Reward",
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            onPressed: claimed ? null : () => claimReward(context),
+          );
+        },
       ),
 
       body: Stack(
@@ -274,41 +301,6 @@ class HomeScreen extends StatelessWidget {
                       color: Colors.orange,
                     ),
                   ),
-
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: FilledButton.icon(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF2E7D32),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                      ),
-                      icon: const Icon(Icons.lightbulb_outline, size: 20),
-                      label: const Text('Money Fact'),
-                      onPressed: () {
-                        showModalBottomSheet<void>(
-                          context: context,
-                          isScrollControlled: true,
-                          useSafeArea: true,
-                          showDragHandle: true,
-                          backgroundColor: Colors.white,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.vertical(
-                              top: Radius.circular(24),
-                            ),
-                          ),
-                          builder: (_) => const FinancialFactSheet(),
-                        );
-                      },
-                    ),
-                  ),
-
-// Lets the button scroll clear of the existing Claim Reward button.
-const SizedBox(height: 90),
-
                 ],
               ),
             ),

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../widgets/phone_formatter.dart';
 import '../widgets/user_doc_builder.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -17,6 +18,49 @@ class ProfileScreen extends StatelessWidget {
   String _text(Map<String, dynamic> data, String field) {
     final v = data[field];
     return v is String ? v.trim() : '';
+  }
+
+  String _formatPhone(String raw) {
+    final digits = raw.replaceAll(RegExp(r'\D'), '');
+
+    if (digits.length == 10) {
+      return '${digits.substring(0, 3)}-${digits.substring(3, 6)}-${digits.substring(6)}';
+    }
+    if (digits.length == 11 && digits.startsWith('1')) {
+      return '1-${digits.substring(1, 4)}-${digits.substring(4, 7)}-${digits.substring(7)}';
+    }
+    return raw;
+  }
+
+  // Loads the current name and phone, then opens the edit dialog
+  Future<void> _openEdit(BuildContext context) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    String name = user.displayName ?? '';
+    String phone = '';
+
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      final d = doc.data() ?? {};
+      name = (d['name'] as String?) ?? name;
+      phone = (d['phone'] as String?) ?? '';
+    } catch (_) {
+      // If loading fails, the dialog just opens with what we have
+    }
+
+    if (!context.mounted) return;
+
+    await showDialog(
+      context: context,
+      builder: (_) => _EditProfileDialog(
+        initialName: name,
+        initialPhone: _formatPhone(phone),
+      ),
+    );
   }
 
   @override
@@ -37,7 +81,7 @@ class ProfileScreen extends StatelessWidget {
             onPressed: () {
               showModalBottomSheet(
                 context: context,
-                builder: (context) {
+                builder: (sheetContext) {
                   return SafeArea(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -45,7 +89,10 @@ class ProfileScreen extends StatelessWidget {
                         ListTile(
                           leading: const Icon(Icons.edit),
                           title: const Text("Edit Profile"),
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.pop(sheetContext);
+                            _openEdit(context);
+                          },
                         ),
                         ListTile(
                           leading: const Icon(Icons.delete, color: Colors.red),
@@ -78,7 +125,7 @@ class ProfileScreen extends StatelessWidget {
               : (user?.email ?? 'No email');
 
           final phone = _text(data, 'phone').isNotEmpty
-              ? _text(data, 'phone')
+              ? _formatPhone(_text(data, 'phone'))
               : 'Not provided';
 
           final createdAt = data['createdAt'];
@@ -102,16 +149,19 @@ class ProfileScreen extends StatelessWidget {
                     Positioned(
                       bottom: 0,
                       right: 0,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.orange,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        padding: const EdgeInsets.all(6),
-                        child: const Icon(
-                          Icons.edit,
-                          color: Colors.white,
-                          size: 18,
+                      child: GestureDetector(
+                        onTap: () => _openEdit(context),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.orange,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          padding: const EdgeInsets.all(6),
+                          child: const Icon(
+                            Icons.edit,
+                            color: Colors.white,
+                            size: 18,
+                          ),
                         ),
                       ),
                     ),
@@ -245,6 +295,145 @@ class ProfileScreen extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+class _EditProfileDialog extends StatefulWidget {
+  final String initialName;
+  final String initialPhone;
+
+  const _EditProfileDialog({
+    required this.initialName,
+    required this.initialPhone,
+  });
+
+  @override
+  State<_EditProfileDialog> createState() => _EditProfileDialogState();
+}
+
+class _EditProfileDialogState extends State<_EditProfileDialog> {
+  late final TextEditingController nameController =
+      TextEditingController(text: widget.initialName);
+  late final TextEditingController phoneController =
+      TextEditingController(text: widget.initialPhone);
+
+  bool saving = false;
+  String? error;
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    phoneController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    final name = nameController.text.trim();
+    final phone = phoneController.text.trim();
+    final digits = phone.replaceAll(RegExp(r'\D'), '');
+
+    if (name.isEmpty) {
+      setState(() => error = 'Name cannot be empty.');
+      return;
+    }
+    if (name.length > 40) {
+      setState(() => error = 'Name must be 40 characters or less.');
+      return;
+    }
+    if (digits.length != 10) {
+      setState(() => error = 'Please enter a 10-digit phone number.');
+      return;
+    }
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    setState(() {
+      saving = true;
+      error = null;
+    });
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({'name': name, 'phone': phone}).timeout(
+              const Duration(seconds: 8));
+
+      try {
+        await user.updateDisplayName(name);
+      } catch (_) {
+        // The Firestore name is the one the app shows, so this is optional
+      }
+
+      if (!mounted) return;
+      final messenger = ScaffoldMessenger.of(context);
+      Navigator.pop(context);
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Profile updated!')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        saving = false;
+        error = 'Could not save. Check your connection and try again.';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text("Edit Profile"),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              textCapitalization: TextCapitalization.words,
+              decoration: const InputDecoration(
+                labelText: "Full name",
+                prefixIcon: Icon(Icons.person),
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 15),
+            TextField(
+              controller: phoneController,
+              keyboardType: TextInputType.phone,
+              inputFormatters: [PhoneDashFormatter()],
+              decoration: const InputDecoration(
+                labelText: "Phone number",
+                hintText: "555-123-4567",
+                prefixIcon: Icon(Icons.phone),
+                border: OutlineInputBorder(),
+              ),
+            ),
+            if (error != null) ...[
+              const SizedBox(height: 12),
+              Text(error!, style: const TextStyle(color: Colors.red)),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: saving ? null : () => Navigator.pop(context),
+          child: const Text("Cancel"),
+        ),
+        ElevatedButton(
+          onPressed: saving ? null : _save,
+          child: saving
+              ? const SizedBox(
+                  height: 18,
+                  width: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text("Save"),
+        ),
+      ],
     );
   }
 }
