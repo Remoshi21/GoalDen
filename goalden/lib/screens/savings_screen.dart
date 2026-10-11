@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:fl_chart/fl_chart.dart';
+import '../widgets/user_doc_builder.dart';
 
 class SavingsScreen extends StatelessWidget {
   const SavingsScreen({super.key});
@@ -8,115 +8,47 @@ class SavingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(220, 255, 255, 1),
-      appBar: AppBar(
-        title: const Text("Budgeting Chart"),
-        backgroundColor: const Color.fromRGBO(156, 236, 237, 1),
-        foregroundColor: Colors.black87,
-      ),
+      appBar: AppBar(title: const Text("Budgeting Chart")),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            const Text(
-              "Monthly Spending Breakdown",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
+            UserDocBuilder(
+              builder: (context, data) {
+                final used = readNum(data, 'budgetUsed');
+                final limit = readNum(data, 'budgetLimit');
+                final progress =
+                    limit > 0 ? (used / limit).clamp(0, 1).toDouble() : 0.0;
 
-            const SizedBox(height: 20),
+                return Column(
+                  children: [
+                    const Text(
+                      "Your Budget",
+                      style:
+                          TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                    ),
 
-            SizedBox(
-              height: 250,
-              child: PieChart(
-                PieChartData(
-                  sections: [
-                    PieChartSectionData(
-                      value: 45,
-                      title: 'Food\n45%',
-                      color: Colors.orange,
-                      radius: 90,
-                    ),
-                    PieChartSectionData(
-                      value: 30,
-                      title: 'Entertainment\n30%',
-                      color: Colors.purple,
-                      radius: 90,
-                    ),
-                    PieChartSectionData(
-                      value: 25,
-                      title: 'Misc\n25%',
-                      color: Colors.blue,
-                      radius: 90,
-                    ),
+                    const SizedBox(height: 20),
+
+                    LinearProgressIndicator(value: progress, minHeight: 16),
+
+                    const SizedBox(height: 10),
+
+                    Text("${formatMoney(used)} / ${formatMoney(limit)}"),
                   ],
-                ),
-              ),
+                );
+              },
             ),
 
             const SizedBox(height: 25),
 
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "Spending History",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
+            const Text(
+              "Deposit History",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
 
-            const SizedBox(height: 10),
-
-            Expanded(
-              child: ListView(
-                children: const [
-                  Card(
-                    child: ListTile(
-                      leading: Icon(Icons.restaurant),
-                      title: Text("-\$42.15"),
-                      subtitle: Text("Food • Oct 2"),
-                    ),
-                  ),
-
-                  Card(
-                    child: ListTile(
-                      leading: Icon(Icons.movie),
-                      title: Text("-\$18.99"),
-                      subtitle: Text("Entertainment • Oct 4"),
-                    ),
-                  ),
-
-                  Card(
-                    child: ListTile(
-                      leading: Icon(Icons.shopping_bag),
-                      title: Text("-\$26.50"),
-                      subtitle: Text("Miscellaneous • Oct 6"),
-                    ),
-                  ),
-
-                  Card(
-                    child: ListTile(
-                      leading: Icon(Icons.restaurant),
-                      title: Text("-\$15.75"),
-                      subtitle: Text("Food • Oct 8"),
-                    ),
-                  ),
-
-                  Card(
-                    child: ListTile(
-                      leading: Icon(Icons.movie),
-                      title: Text("-\$35.00"),
-                      subtitle: Text("Entertainment • Oct 10"),
-                    ),
-                  ),
-
-                  Card(
-                    child: ListTile(
-                      leading: Icon(Icons.shopping_bag),
-                      title: Text("-\$12.99"),
-                      subtitle: Text("Miscellaneous • Oct 12"),
-                    ),
-                  ),
-                ],
-              ),
+            const Expanded(
+              child: Center(child: Text("No deposits yet.")),
             ),
           ],
         ),

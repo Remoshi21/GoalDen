@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/user_doc_builder.dart';
 import 'balance_screen.dart';
 import 'savings_screen.dart';
 import 'rewards_screen.dart';
@@ -83,6 +84,40 @@ class DashboardCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// Shows one live number (balance or points) from the user's Firestore document
+class LiveStat extends StatelessWidget {
+  final String field; // 'balance' or 'points'
+  final String title;
+  final IconData icon;
+  final Color color;
+  final bool isMoney;
+
+  const LiveStat({
+    super.key,
+    required this.field,
+    required this.title,
+    required this.icon,
+    required this.color,
+    this.isMoney = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return UserDocBuilder(
+      builder: (context, data) {
+        final amount = readNum(data, field);
+
+        return DashboardCard(
+          icon: icon,
+          title: title,
+          value: isMoney ? formatMoney(amount) : amount.toInt().toString(),
+          color: color,
+        );
+      },
     );
   }
 }
@@ -183,6 +218,7 @@ class HomeScreen extends StatelessWidget {
 
                   const SizedBox(height: 30),
 
+                  // Current Balance (live from Firestore)
                   InkWell(
                     borderRadius: BorderRadius.circular(25),
                     onTap: () {
@@ -191,14 +227,16 @@ class HomeScreen extends StatelessWidget {
                         slideRoute(const BalanceScreen()),
                       );
                     },
-                    child: const DashboardCard(
-                      icon: Icons.account_balance_wallet,
+                    child: const LiveStat(
+                      field: 'balance',
                       title: "Current Balance",
-                      value: "\$1,250",
+                      icon: Icons.account_balance_wallet,
                       color: Colors.green,
+                      isMoney: true,
                     ),
                   ),
 
+                  // Budgeting Chart (live from Firestore)
                   InkWell(
                     borderRadius: BorderRadius.circular(25),
                     onTap: () {
@@ -207,14 +245,18 @@ class HomeScreen extends StatelessWidget {
                         slideRoute(const SavingsScreen()),
                       );
                     },
-                    child: const DashboardCard(
-                      icon: Icons.savings,
-                      title: "Budgeting Chart",
-                      value: "\$500 / \$2000",
-                      color: Colors.pink,
+                    child: UserDocBuilder(
+                      builder: (context, data) => DashboardCard(
+                        icon: Icons.savings,
+                        title: "Budgeting Chart",
+                        value:
+                            "${formatMoney(readNum(data, 'budgetUsed'))} / ${formatMoney(readNum(data, 'budgetLimit'))}",
+                        color: Colors.pink,
+                      ),
                     ),
                   ),
 
+                  // Reward Points (live from Firestore)
                   InkWell(
                     borderRadius: BorderRadius.circular(25),
                     onTap: () {
@@ -223,10 +265,10 @@ class HomeScreen extends StatelessWidget {
                         slideRoute(const RewardsScreen()),
                       );
                     },
-                    child: const DashboardCard(
-                      icon: Icons.emoji_events,
+                    child: const LiveStat(
+                      field: 'points',
                       title: "Reward Points",
-                      value: "350",
+                      icon: Icons.emoji_events,
                       color: Colors.orange,
                     ),
                   ),

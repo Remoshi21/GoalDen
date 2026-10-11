@@ -34,6 +34,10 @@ class AuthService {
               'name': name,
               'phone': phone,
               'email': email,
+              'balance': 0,
+              'points': 0,
+              'budgetUsed': 0,
+              'budgetLimit': 0,
               'createdAt': FieldValue.serverTimestamp(),
             })
             .timeout(const Duration(seconds: 5));

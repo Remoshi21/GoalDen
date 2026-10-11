@@ -63,7 +63,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
-    // Phone: allow digits, spaces, dashes, parentheses, and a leading +
     final phoneDigits = phone.replaceAll(RegExp(r'\D'), '');
     final phoneChars = RegExp(r'^\+?[0-9\s\-()]+$');
     if (!phoneChars.hasMatch(phone) ||
